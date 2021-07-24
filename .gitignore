@@ -1,0 +1,4 @@
+# external imports for micropython
+lib
+# personal configuration, should nevre to go git
+config.json
