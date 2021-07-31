@@ -3,6 +3,10 @@ def idle():
     pass
 
 
+def reset():
+    pass
+
+
 class Pin:
     IN = "in"
     OUT = "out"

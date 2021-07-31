@@ -18,7 +18,6 @@ if ! test -w "$AMPY_PORT"; then
 fi
 
 # XXX: terrible, use micropython pip instead
-# XXX2: move to lib/ ?
 # get hmac from external
 mkdir -p lib
 (cd lib ; 

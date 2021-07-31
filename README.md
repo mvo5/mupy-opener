@@ -51,7 +51,10 @@ Then create a config.json with your configuration, something like:
     "ssid": "my-wlan",
     "key": "my-key",
     "hostname": "opener",
-    
+
+    "telegram-bot-token": "123:asfsdfa",
+    "telegram-chat-id": "1234",
+
     "hmac-key": "generate with e.g. dd if=/dev/random count=32 bs=1 | base64"
 }
 ```
@@ -66,6 +69,16 @@ into your smartphone. You can also use the open.py example:
 $ PYTHONPATH=. python3 ./cli/open.py
 ```
 to open.
+
+### Telegram support
+
+The system can send telegram message to monitor the status of
+the system. You can create your own personal bot with the
+botfather and then store the secret token inside the config.
+The chat-id of the target user is also required, it's possible
+to obtain that by asking the @RawDataBot about it. Also make
+sure that start a chat with your bot first, otherwise no
+messages will arrive.
 
 
 ## Testing
@@ -93,6 +106,4 @@ to do some manual checks.
 Some design consierations:
 1. security must be good enough to trust it opening a garage door
 1. everything must be simple enough to run on a esp32
-
-
 

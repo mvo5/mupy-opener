@@ -1,5 +1,6 @@
 import sys
 import time
+import _thread
 
 is_micropython = (sys.implementation.name == "micropython")
 
@@ -7,16 +8,22 @@ if not is_micropython:
     import binascii
     import json
     import socket
-    from mock.machine import Pin
+    from mock import machine
     import mock.uos as os
 else:
     import binascii
     import json
     import os
     import socket
-    from machine import Pin
+    import machine
+
 
 from sjm import SignedJsonMessage
+from utgbot import TelegramBot
+
+
+# available if defined in the config
+telegram_bot = TelegramBot()
 
 # XXX: make all this configurable in config.json
 # default port we listen to
@@ -32,7 +39,7 @@ def gen_nonce():
 
 
 def toogle_pin(pin):
-    pin = Pin(pin, Pin.OUT)
+    pin = machine.Pin(pin, machine.Pin.OUT)
     pin.value(1)
     time.sleep(OPENER_WAIT)
     pin.value(0)
@@ -57,9 +64,13 @@ def wait_for_commands(key, port):
     s.bind(addr)
     s.listen(1)
     print("listening on {}".format(addr))
+    # XXX: use generic log method
+    telegram_bot.send("mupy-opener initialized")
     while True:
         conn, addr = s.accept()
-        # XXX: send (async) to telegram for logging
+        # run tg msg async to not block main data exchange
+        _thread.start_new_thread(
+            telegram_bot.send, ("connection from  {}".format(addr), ))
         print("connection from {}".format(addr))
         # XXX: add integration test that checks if it really timeouts
         conn.settimeout(5.0)
@@ -93,6 +104,8 @@ def wait_for_commands(key, port):
             err = '{"error": "unknown command %s"}\n' % cmd
             print(err)
             f.write(err.encode("ascii"))
+        # log event
+        telegram_bot.send("door opened by {}".format(addr))
         # done
         conn.close()
 
@@ -106,14 +119,22 @@ def main():
     with open("config.json") as f:
         cfg = json.load(f)
     hmac_key = cfg.get("hmac-key").encode("ascii")
+    # init bot
+    telegram_bot_token = cfg.get("telegram-bot-token")
+    telegram_chat_id = cfg.get("telegram-chat-id")
+    if telegram_bot_token and telegram_chat_id:
+        print("connecting telegram bot")
+        telegram_bot.config(telegram_bot_token, telegram_chat_id)
+
     # print("using key", hmac_key)
     if not hmac_key:
         # generated with: dd if=/dev/random count=32 bs=1 | base64
         print("no hmac-key set, please generate a strong 32byte key")
         return
-    # if len(hmac_key) < 20:
-    #     print("hmac key {} should be 32 chars".format(hmac_key))
-    #     return
+    # This should be at least 128bit of real randomness
+    if len(hmac_key) < 16:
+        print("hmac key {} should not be too short".format(hmac_key))
+        return
 
     # main execution loop - any (uncaught) error here will trigger a
     # reboot to ensure the machine is always available
