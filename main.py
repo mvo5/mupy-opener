@@ -24,11 +24,8 @@ from utgbot import TelegramBot
 # available if defined in the config
 telegram_bot = TelegramBot()
 
-# XXX: make all this configurable in config.json
-# default port we listen to
+# tcp port to listen on
 PORT = 8877
-# gpio pin to open
-OPENER_PIN = 21
 # opener wait in sec
 OPENER_WAIT = 1
 
@@ -61,7 +58,7 @@ def recv_with_hmac(so, key, nonce):
     return sjm.payload
 
 
-def wait_for_commands(key, port):
+def wait_for_commands(key, port, opener_pin):
     # XXX: why pick the last one?
     addr = socket.getaddrinfo("0.0.0.0", port)[0][-1]
     s = socket.socket()
@@ -95,7 +92,7 @@ def wait_for_commands(key, port):
             continue
         # accept command
         if cmd.get("cmd") == "open":
-            toogle_pin(OPENER_PIN)
+            toogle_pin(opener_pin)
             try:
                 send_with_hmac(f, key, nonce, {"status": "ok"})
             except Exception as e:
@@ -113,22 +110,24 @@ def wait_for_commands(key, port):
 
 
 def read_config():
+    global cfg
     with open("config.json") as f:
-        return json.load(f)
+        cfg = json.load(f)
 
 
 def main():
     with open("config.json") as f:
         cfg = json.load(f)
-    hmac_key = cfg.get("hmac-key").encode("ascii")
     # init bot
     telegram_bot_token = cfg.get("telegram-bot-token")
     telegram_chat_id = cfg.get("telegram-chat-id")
     if telegram_bot_token and telegram_chat_id:
         print("connecting telegram bot")
         telegram_bot.config(telegram_bot_token, telegram_chat_id)
-
-    # print("using key", hmac_key)
+    # gpio pin that is used
+    opener_pin = cfg.get("opener-gpio-pin", 21)
+    # hmac-key
+    hmac_key = cfg.get("hmac-key").encode("ascii")
     if not hmac_key:
         # generated with: dd if=/dev/random count=32 bs=1 | base64
         print("no hmac-key set, please generate a strong 32byte key")
@@ -141,7 +140,7 @@ def main():
     # main execution loop - any (uncaught) error here will trigger a
     # reboot to ensure the machine is always available
     try:
-        wait_for_commands(hmac_key, PORT)
+        wait_for_commands(hmac_key, PORT, opener_pin)
     except KeyboardInterrupt:
         raise
     except Exception as e:
