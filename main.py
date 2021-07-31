@@ -1,6 +1,5 @@
 import sys
 import time
-import _thread
 
 is_micropython = (sys.implementation.name == "micropython")
 
@@ -34,6 +33,11 @@ OPENER_PIN = 21
 OPENER_WAIT = 1
 
 
+def tg_log(msg):
+    print("tg_log: %s" % msg)
+    telegram_bot.send(msg)
+
+
 def gen_nonce():
     return binascii.b2a_base64(os.urandom(32)).strip().decode("ascii")
 
@@ -63,32 +67,30 @@ def wait_for_commands(key, port):
     s = socket.socket()
     s.bind(addr)
     s.listen(1)
-    print("listening on {}".format(addr))
-    # XXX: use generic log method
-    telegram_bot.send("mupy-opener initialized")
+    tg_log("mupy-opener listening on port %s" % PORT)
     while True:
         conn, addr = s.accept()
-        # run tg msg async to not block main data exchange
-        _thread.start_new_thread(
-            telegram_bot.send, ("connection from  {}".format(addr), ))
+        # No tg_log() here to avoid delaying processing of the commands,
+        # also no _thread.start_new_thread() because that is too memory
+        # hungry on the esp32
         print("connection from {}".format(addr))
         # XXX: add integration test that checks if it really timeouts
         conn.settimeout(5.0)
         # only binary data is supported by micropython
         f = conn.makefile("rwb", 0)
-        # send header, nonce and hmac
+        # securely generate session nonce
         nonce = gen_nonce()
         try:
             send_with_hmac(f, key, nonce, {"version": 1, "api": "opener"})
         except Exception as e:
-            print(e)
+            tg_log("cannot send helo: %s to %s" % (e, addr))
             conn.close()
             continue
         # we expect a command next
         try:
             cmd = recv_with_hmac(f, key, nonce)
         except Exception as e:
-            print(e)
+            tg_log("cannot recv cmd: %s from %s" % (e, addr))
             conn.close()
             continue
         # accept command
@@ -97,15 +99,15 @@ def wait_for_commands(key, port):
             try:
                 send_with_hmac(f, key, nonce, {"status": "ok"})
             except Exception as e:
-                print(e)
+                tg_log("cannot send status: %s to %s" % (e, addr))
                 conn.close()
                 continue
         else:
             err = '{"error": "unknown command %s"}\n' % cmd
-            print(err)
+            tg_log("unknown command in %s from %s" % (cmd, addr))
             f.write(err.encode("ascii"))
         # log event
-        telegram_bot.send("door opened by {}".format(addr))
+        tg_log("door opened by {}".format(addr))
         # done
         conn.close()
 

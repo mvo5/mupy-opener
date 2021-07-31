@@ -44,7 +44,7 @@ class TestMain(BaseTest):
         with open("config.json", "w") as fp:
             fp.write(json.dumps(mock_conf))
 
-    @patch("main.telegram_bot.send")
+    @patch("main.tg_log")
     def test_main_integration_runthrough(self, mock_tg_send):
         tg_bot_send_q = multiprocessing.Queue()
         mock_tg_send.side_effect = lambda *args: tg_bot_send_q.put(*args)
@@ -57,7 +57,8 @@ class TestMain(BaseTest):
         addr = socket.getaddrinfo("localhost", main.PORT)[0][-1]
         with socket.socket() as sss:
             connect_or_retry(sss, addr, 10)
-            self.assertEqual(tg_bot_send_q.get(), "mupy-opener initialized")
+            self.assertRegex(
+                tg_bot_send_q.get(), r'mupy-opener listening on port [0-9]+')
             ss = sss.makefile("rwb", 0)
             m1 = ss.readline()
             sjm = SignedJsonMessage.from_string(
@@ -65,7 +66,6 @@ class TestMain(BaseTest):
             self.assertEqual(
                 sjm.payload,
                 {"version": 1, "api": "opener"})
-            self.assertRegex(tg_bot_send_q.get(), r'connection from .*')
             sjm2 = SignedJsonMessage(self.hmac_key, sjm.nonce)
             sjm2.set_payload({"cmd": "open"})
             ss.write(str(sjm2).encode("utf-8") + b"\n")
