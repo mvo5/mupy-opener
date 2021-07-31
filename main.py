@@ -114,7 +114,17 @@ def main():
     # if len(hmac_key) < 20:
     #     print("hmac key {} should be 32 chars".format(hmac_key))
     #     return
-    wait_for_commands(hmac_key, PORT)
+
+    # main execution loop - any (uncaught) error here will trigger a
+    # reboot to ensure the machine is always available
+    try:
+        wait_for_commands(hmac_key, PORT)
+    except KeyboardInterrupt:
+        raise
+    except Exception as e:
+        # XXX: try logging via tg?
+        print("reboot from exception in wait_for_commands: {}".format(e))
+        machine.reset()
 
 
 if __name__ == "__main__":
