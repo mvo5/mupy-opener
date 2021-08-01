@@ -1,10 +1,11 @@
 
 try:
-    import urequests
+    import mvourequests as urequests
 except ImportError:
     import requests as urequests
 
 BASE_URL = "https://api.telegram.org/bot"
+TIMEOUT = 10
 
 
 class TelegramBot:
@@ -24,8 +25,12 @@ class TelegramBot:
                 'Accept': 'text/plain',
             }
             data = {'chat_id': self._chat_id, 'text': text}
+            # XXX: default urequests has no "timeout" parameter, this
+            # uses the fork in mvo5:micropython-lib/urequests-simple-timeout
             response = urequests.post(
-                self._url + '/sendMessage', json=data, headers=headers)
+                self._url + '/sendMessage', json=data, headers=headers,
+                timeout=TIMEOUT,
+            )
             response.close()
             if response.status_code != 200:
                 print(

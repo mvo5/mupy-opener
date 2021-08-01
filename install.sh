@@ -23,6 +23,7 @@ mkdir -p lib
 (cd lib ; 
   wget -c https://raw.githubusercontent.com/micropython/micropython-lib/master/python-stdlib/hmac/hmac.py ; 
   wget -c https://raw.githubusercontent.com/micropython/micropython-lib/master/python-stdlib/warnings/warnings.py ;
+  wget -c -O mvourequests.py https://raw.githubusercontent.com/mvo5/micropython-lib/urequests-simple-timeout/python-ecosys/urequests/urequests.py;
 )
 mkdir -p lib/hashlib
 (cd lib/hashlib;
