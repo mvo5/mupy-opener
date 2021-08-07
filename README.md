@@ -47,6 +47,15 @@ $ PYTHONPATH=. python3 ./cli/open.py
 ```
 to open.
 
+## Update
+
+To update, just run `install.sh` again - but one side effect of
+running the watchdog timer (see below) is that to reflash via
+`install.sh` one needs to interrupt the esp32 boot very early via
+e.g. `screen /dev/ttyUSB0 115200` and then `ctrl-c` in there to avoid
+the watchdog from getting triggered. After that the `install.sh` will
+work normally.
+
 ### Telegram support
 
 The system can send telegram message to monitor the status of
@@ -100,7 +109,6 @@ to run the unittest. For "sjm.py" at least you can run:
 $ MICROPYPATH=./lib micropython ./sjm.py
 ```
 to do some manual checks.
-
 
 ## Robustness
 
