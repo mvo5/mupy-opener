@@ -9,12 +9,14 @@ if not is_micropython:
     import socket
     from mock import machine
     import mock.uos as os
+    import mock.usys as usys
 else:
     import binascii
     import json
     import os
     import socket
     import machine
+    import usys
 
 
 from sjm import SignedJsonMessage
@@ -23,6 +25,9 @@ from utgbot import TelegramBot
 
 # available if defined in the config
 telegram_bot = TelegramBot()
+
+# will be overriden with a handler on the fs
+last_crash_fp = usys.stderr
 
 # tcp port to listen on
 PORT = 8877
@@ -137,6 +142,9 @@ def main():
         print("hmac key {} should not be too short".format(hmac_key))
         return
 
+    global last_crash_fp
+    last_crash_fp = open("last-crash.log", "a")
+
     # main execution loop - any (uncaught) error here will trigger a
     # reboot to ensure the machine is always available
     try:
@@ -144,8 +152,14 @@ def main():
     except KeyboardInterrupt:
         raise
     except Exception as e:
-        # XXX: try logging via tg?
-        print("reboot from exception in wait_for_commands: {}".format(e))
+        # log to last-crash file
+        last_crash_fp.seek(0, 0)
+        usys.print_exception(e, last_crash_fp)
+        last_crash_fp.flush()
+        last_crash_fp.close()
+        # log to screen
+        print("reboot from exception in wait_for_commands:")
+        usys.print_exception(e)
         machine.reset()
 
 

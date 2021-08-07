@@ -83,3 +83,10 @@ class TestMain(BaseTest):
         with open("pin21.value") as fp:
             content = fp.readlines()
         self.assertEqual(content, ["1\n", "0\n"])
+
+    @patch("socket.socket")
+    def test_main_handles_exception(self, mock_socket):
+        mock_socket.side_effect = Exception("fake exception")
+        main.main()
+        with open("last-crash.log") as fp:
+            self.assertEqual(fp.read(), "fake exception\n")
