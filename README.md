@@ -1,12 +1,12 @@
 # Opener in micropython for ESP32
 
 This repo provides a micropython application that can run on the ESP32
-(but this could be run on a raspberry pi as well) as a small TCP
+(but this could be ported to a raspberry pi as well) as a small TCP
 service that allows to trigger actions based on signed json
 messages. The code and framework is flexible and easy to extend.
 
 However (due to YAGNI) it currently only implements the main use-case:
-set a pin to "high" for 1sec to close a relay that will open a garage
+set a pin to "high" for 1 sec to close a relay that will open a garage
 door.
 
 There is a CLI python program to trigger the opening and a matching
@@ -20,7 +20,7 @@ don't have one already) with something like:
 export AMPY_PORT=/dev/ttyUSB0
 ```
 
-Then create a config.json with your configuration, something like:
+Then create a `config.json` with your configuration, something like:
 ```
 {
     "ssid": "my-wlan",
@@ -38,7 +38,7 @@ Then create a config.json with your configuration, something like:
 
 and place it in the source dir. Then run `install.sh` and all the
 files will get uploaded to the esp32. The hmac-key should be big
-enough, 32 bytes of randomness (128bit) are plenty here.
+enough, 32 bytes of randomness (128bit) should be fine here.
 
 You can use the `cli/gen-qrcode` binary to import the shared secret
 into your smartphone. You can also use the open.py example:
@@ -100,6 +100,15 @@ to run the unittest. For "sjm.py" at least you can run:
 $ MICROPYPATH=./lib micropython ./sjm.py
 ```
 to do some manual checks.
+
+
+## Robustness
+
+The code was written with the goal that it should never go into
+a state where the opener will stop responding. This means that
+any uncaught exceptions are logged in `last-crash.log` and then
+the machine is restarted. In additon a watchdog timer is setup
+and it will trigger a reboot after 20s hang.
 
 
 ## Design considerations

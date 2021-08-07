@@ -80,9 +80,12 @@ class TestMain(BaseTest):
             if os.path.exists("pin21.value"):
                 break
             time.sleep(0.5)
+        # ensure ping value was written
         with open("pin21.value") as fp:
-            content = fp.readlines()
-        self.assertEqual(content, ["1\n", "0\n"])
+            self.assertEqual(fp.readlines(), ["1\n", "0\n"])
+        # ensure watchdog timer was triggered
+        with open("wdt.log") as fp:
+            self.assertEqual(fp.read(), "2")
 
     @patch("socket.socket")
     def test_main_handles_exception(self, mock_socket):

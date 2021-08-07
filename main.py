@@ -67,11 +67,21 @@ def wait_for_commands(key, port, opener_pin):
     # XXX: why pick the last one?
     addr = socket.getaddrinfo("0.0.0.0", port)[0][-1]
     s = socket.socket()
+    # socket wait will timeout every 5s
+    s.settimeout(5.0)
     s.bind(addr)
     s.listen(1)
     tg_log("mupy-opener listening on port %s" % PORT)
+
+    # watchdog timeout for 20s
+    wdt = machine.WDT(timeout=20000)
     while True:
-        conn, addr = s.accept()
+        wdt.feed()
+        try:
+            conn, addr = s.accept()
+        except OSError:
+            # this will feed the watchgod every 5s
+            continue
         # No tg_log() here to avoid delaying processing of the commands,
         # also no _thread.start_new_thread() because that is too memory
         # hungry on the esp32
