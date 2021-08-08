@@ -7,13 +7,15 @@ from boot import read_config
 
 
 if __name__ == "__main__":
-    cfg = read_config()
-
-    qr = qrcode.QRCode(
-        box_size=10,
-        border=4,
-    )
-    qr.add_data(cfg["hmac-key"].encode("ascii"))
+    # read full config (including defaults)
+    full_cfg = read_config()
+    # only show the relevant subset for the app to scan
+    cfg = {
+        "hostname": full_cfg["hostname"],
+        "hmac-key": full_cfg["hmac-key"],
+    }
+    qr = qrcode.QRCode()
+    qr.add_data(cfg)
     qr.make(fit=True)
     print("hmac-key, import to smartphone")
     qr.print_ascii()
