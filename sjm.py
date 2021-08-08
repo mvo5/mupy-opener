@@ -24,6 +24,10 @@ def b64encode_json(obj):
     return b64encode_to_str(json.dumps(obj).encode("utf-8"))
 
 
+class InvalidFormatError(Exception):
+    pass
+
+
 class InvalidSignatureError(Exception):
     pass
 
@@ -84,7 +88,10 @@ class SignedJsonMessage:
     @staticmethod
     def from_string(s, key, expected_nonce=None, digestmode=hashlib.sha512):
         # type: (str, bytes, str,  Callable[..., Any]) -> SignedJsonMessage
-        encoded_header_payload, encoded_signature = s.rsplit(".", 1)
+        try:
+            encoded_header_payload, encoded_signature = s.rsplit(".", 1)
+        except ValueError:
+            raise InvalidFormatError("invalid data format %s" % s)
         recv_sig = b64decode_from_str(encoded_signature)
         calculated_sig = hmac.HMAC(
             key, encoded_header_payload.encode("utf-8"), digestmode).digest()

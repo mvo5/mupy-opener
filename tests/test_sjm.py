@@ -24,6 +24,11 @@ class TestSignedJsonMessage(unittest.TestCase):
         self.assertEqual(self.sjmsg._payload, sjmsg2._payload)
         self.assertEqual(str(self.sjmsg), str(sjmsg2))
 
+    def test_sjm_from_string_wrong_format_empty(self):
+        with self.assertRaises(sjm.InvalidFormatError):
+            sjm.SignedJsonMessage.from_string(
+                "", b"other-key", self.nonce)
+
     def test_sjm_from_string_wrong_sig(self):
         with self.assertRaises(sjm.InvalidSignatureError):
             sjm.SignedJsonMessage.from_string(
