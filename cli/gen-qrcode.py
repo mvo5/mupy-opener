@@ -1,6 +1,8 @@
 #!/usr/bin/python3
 import io
+import json
 import subprocess
+
 import qrcode
 
 from boot import read_config
@@ -15,9 +17,9 @@ if __name__ == "__main__":
         "hmac-key": full_cfg["hmac-key"],
     }
     qr = qrcode.QRCode()
-    qr.add_data(cfg)
+    qr.add_data(json.dumps(cfg))
     qr.make(fit=True)
-    print("hmac-key, import to smartphone")
+    print("config for %s, import to smartphone" % cfg["hostname"])
     qr.print_ascii()
     img = qr.make_image()
     p = subprocess.Popen(["display", "-"], stdin=subprocess.PIPE)
