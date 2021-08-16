@@ -85,7 +85,12 @@ def wait_for_commands(key, port, opener_pin):
         # No tg_log() here to avoid delaying processing of the commands,
         # also no _thread.start_new_thread() because that is too memory
         # hungry on the esp32
-        print("connection from {}".format(addr))
+        hostname_or_ip = addr[0]
+        try:
+            hostname_or_ip = socket.gethostbyaddr(hostname_or_ip)[0]
+        except Exception as e:
+            print("cannot resolve {}: {}".format(hostname_or_ip, e))
+        print("connection from {}".format(hostname_or_ip))
         # XXX: add integration test that checks if it really timeouts
         conn.settimeout(5.0)
         # only binary data is supported by micropython
@@ -95,14 +100,14 @@ def wait_for_commands(key, port, opener_pin):
         try:
             send_with_hmac(f, key, nonce, {"version": 1, "api": "opener"})
         except Exception as e:
-            tg_log("cannot send helo: %s to %s" % (e, addr))
+            tg_log("cannot send helo: %s to %s" % (e, hostname_or_ip))
             conn.close()
             continue
         # we expect a command next
         try:
             cmd = recv_with_hmac(f, key, nonce)
         except Exception as e:
-            tg_log("cannot recv cmd: %s from %s" % (e, addr))
+            tg_log("cannot recv cmd: %s from %s" % (e, hostname_or_ip))
             conn.close()
             continue
         # accept command
@@ -111,15 +116,15 @@ def wait_for_commands(key, port, opener_pin):
             try:
                 send_with_hmac(f, key, nonce, {"status": "ok"})
             except Exception as e:
-                tg_log("cannot send status: %s to %s" % (e, addr))
+                tg_log("cannot send status: %s to %s" % (e, hostname_or_ip))
                 conn.close()
                 continue
         else:
             err = '{"error": "unknown command %s"}\n' % cmd
-            tg_log("unknown command in %s from %s" % (cmd, addr))
+            tg_log("unknown command in %s from %s" % (cmd, hostname_or_ip))
             f.write(err.encode("ascii"))
         # log event
-        tg_log("door opened by {}".format(addr))
+        tg_log("door opened by {}".format(hostname_or_ip))
         # done
         conn.close()
 
