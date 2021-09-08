@@ -41,7 +41,10 @@ files will get uploaded to the esp32. The hmac-key should be big
 enough, 32 bytes of randomness (128bit) should be fine here.
 
 You can use the `cli/gen-qrcode` binary to import the shared secret
-into your smartphone. You can also use the open.py example:
+into your smartphone. The smartphone app is availalbe on:
+https://play.google.com/store/apps/details?id=de.int10.muopener
+
+You can also use the open.py example:
 ```
 $ PYTHONPATH=. python3 ./cli/open.py
 ```
