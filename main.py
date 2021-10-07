@@ -66,6 +66,7 @@ def recv_with_hmac(so, key, nonce):
 def wait_for_commands(key, port, opener_pin):
     # XXX: why pick the last one?
     addr = socket.getaddrinfo("0.0.0.0", port)[0][-1]
+    device_info = "unknown"
     s = socket.socket()
     # socket wait will timeout every 5s
     s.settimeout(5.0)
@@ -107,6 +108,7 @@ def wait_for_commands(key, port, opener_pin):
             continue
         # accept command
         if cmd.get("cmd") == "open":
+            device_info = cmd.get("device-info")
             toogle_pin(opener_pin)
             try:
                 send_with_hmac(f, key, nonce, {"status": "ok"})
@@ -119,7 +121,7 @@ def wait_for_commands(key, port, opener_pin):
             tg_log("unknown command in %s from %s" % (cmd, addr))
             f.write(err.encode("ascii"))
         # log event
-        tg_log("door opened by {}".format(addr))
+        tg_log("door opened by {} {}".format(device_info, addr))
         # done
         conn.close()
 
