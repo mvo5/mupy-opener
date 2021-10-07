@@ -74,7 +74,7 @@ class TestMain(BaseTest):
             sjm3 = SignedJsonMessage.from_string(
                 m2.decode("utf-8"), self.hmac_key, sjm.nonce)
             self.assertEqual(sjm3.payload, {"status": "ok"})
-            self.assertRegex(tg_bot_send_q.get(), r'door opened by localhost')
+            self.assertRegex(tg_bot_send_q.get(), r'door opened by .*')
             # XXX: test that the socket gets closed
         for i in range(20):
             if os.path.exists("pin21.value"):
