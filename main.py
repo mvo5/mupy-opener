@@ -35,7 +35,7 @@ OPENER_WAIT = 1
 
 
 def tg_log(msg):
-    print("tg_log: %s" % msg)
+    print("tg_log: {}".format(msg))
     telegram_bot.send(msg)
 
 
@@ -85,7 +85,7 @@ def wait_for_commands(key, hostname, port, opener_pin):
         # No tg_log() here to avoid delaying processing of the commands,
         # also no _thread.start_new_thread() because that is too memory
         # hungry on the esp32
-        print("connection from {}".format(addr))
+        print("connection on {} from {}".format(hostname, addr))
         # XXX: add integration test that checks if it really timeouts
         conn.settimeout(5.0)
         # only binary data is supported by micropython
@@ -96,7 +96,7 @@ def wait_for_commands(key, hostname, port, opener_pin):
             send_with_hmac(f, key, nonce, {"version": 1, "api": "opener"})
         except Exception as e:
             tg_log(
-                "cannot send helo on %s: %s to %s".format(hostname, e, addr))
+                "cannot send helo on {}: {} to {}".format(hostname, e, addr))
             conn.close()
             continue
         # we expect a command next
@@ -104,7 +104,7 @@ def wait_for_commands(key, hostname, port, opener_pin):
             cmd = recv_with_hmac(f, key, nonce)
         except Exception as e:
             tg_log(
-                "cannot recv cmd on %s: %s from %s".format(hostname, e, addr))
+                "cannot recv cmd on {}: {} from {}".format(hostname, e, addr))
             conn.close()
             continue
         # accept command
@@ -114,18 +114,18 @@ def wait_for_commands(key, hostname, port, opener_pin):
             try:
                 send_with_hmac(f, key, nonce, {"status": "ok"})
             except Exception as e:
-                tg_log("cannot send status on %s: %s to %s".format(
+                tg_log("cannot send status on {}: {} to {}".format(
                     hostname, e, addr))
                 conn.close()
                 continue
         else:
-            err = '{"error": "unknown command %s"}\n' % cmd
-            tg_log("unknown command on %s in %s from %s".format(
+            err = '{"error": "unknown command {}"}\n'.format(cmd)
+            tg_log("unknown command on {} in {} from {}".format(
                 hostname, cmd, addr))
             f.write(err.encode("ascii"))
         # log event
         tg_log(
-            "door opened on {} by {} {}".format(hostname, device_info, addr))
+            "door on {} opened by {} {}".format(hostname, device_info, addr))
         # done
         conn.close()
 
