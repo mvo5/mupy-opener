@@ -91,7 +91,7 @@ class SignedJsonMessage:
         try:
             encoded_header_payload, encoded_signature = s.rsplit(".", 1)
         except ValueError:
-            raise InvalidFormatError("invalid data format %s" % s)
+            raise InvalidFormatError("invalid data format '%s'" % s)
         recv_sig = b64decode_from_str(encoded_signature)
         calculated_sig = hmac.HMAC(
             key, encoded_header_payload.encode("utf-8"), digestmode).digest()
