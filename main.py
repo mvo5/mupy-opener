@@ -5,20 +5,19 @@ is_micropython = (sys.implementation.name == "micropython")
 
 if not is_micropython:
     import binascii
-    import json
     import socket
     from mock import machine
     import mock.uos as os
     import mock.usys as usys
 else:
     import binascii
-    import json
     import os
     import socket
     import machine
     import usys
 
 
+from config import read_config
 from sjm import SignedJsonMessage
 from utgbot import TelegramBot
 
@@ -126,15 +125,8 @@ def wait_for_commands(key, port, opener_pin):
         conn.close()
 
 
-def read_config():
-    global cfg
-    with open("config.json") as f:
-        cfg = json.load(f)
-
-
 def main():
-    with open("config.json") as f:
-        cfg = json.load(f)
+    cfg = read_config()
     # init bot
     telegram_bot_token = cfg.get("telegram-bot-token")
     telegram_chat_id = cfg.get("telegram-chat-id")
