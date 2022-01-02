@@ -62,7 +62,7 @@ def recv_with_hmac(so, key, nonce):
     return sjm.payload
 
 
-def wait_for_commands(key, port, opener_pin):
+def wait_for_commands(key, hostname, port, opener_pin):
     # XXX: why pick the last one?
     addr = socket.getaddrinfo("0.0.0.0", port)[0][-1]
     device_info = "unknown"
@@ -71,7 +71,7 @@ def wait_for_commands(key, port, opener_pin):
     s.settimeout(5.0)
     s.bind(addr)
     s.listen(1)
-    tg_log("mupy-opener listening on port %s" % PORT)
+    tg_log("mupy-opener listening on {} port {}".format(hostname, PORT))
 
     # watchdog timeout for 20s
     wdt = machine.WDT(timeout=20000)
@@ -95,14 +95,16 @@ def wait_for_commands(key, port, opener_pin):
         try:
             send_with_hmac(f, key, nonce, {"version": 1, "api": "opener"})
         except Exception as e:
-            tg_log("cannot send helo: %s to %s" % (e, addr))
+            tg_log(
+                "cannot send helo on %s: %s to %s".format(hostname, e, addr))
             conn.close()
             continue
         # we expect a command next
         try:
             cmd = recv_with_hmac(f, key, nonce)
         except Exception as e:
-            tg_log("cannot recv cmd: %s from %s" % (e, addr))
+            tg_log(
+                "cannot recv cmd on %s: %s from %s".format(hostname, e, addr))
             conn.close()
             continue
         # accept command
@@ -112,15 +114,18 @@ def wait_for_commands(key, port, opener_pin):
             try:
                 send_with_hmac(f, key, nonce, {"status": "ok"})
             except Exception as e:
-                tg_log("cannot send status: %s to %s" % (e, addr))
+                tg_log("cannot send status on %s: %s to %s".format(
+                    hostname, e, addr))
                 conn.close()
                 continue
         else:
             err = '{"error": "unknown command %s"}\n' % cmd
-            tg_log("unknown command in %s from %s" % (cmd, addr))
+            tg_log("unknown command on %s in %s from %s".format(
+                hostname, cmd, addr))
             f.write(err.encode("ascii"))
         # log event
-        tg_log("door opened by {} {}".format(device_info, addr))
+        tg_log(
+            "door opened on {} by {} {}".format(hostname, device_info, addr))
         # done
         conn.close()
 
@@ -133,6 +138,8 @@ def main():
     if telegram_bot_token and telegram_chat_id:
         print("connecting telegram bot")
         telegram_bot.config(telegram_bot_token, telegram_chat_id)
+    # hostname
+    hostname = cfg.get("hostname")
     # gpio pin that is used
     opener_pin = cfg.get("opener-gpio-pin", 21)
     # hmac-key
@@ -152,7 +159,7 @@ def main():
     # main execution loop - any (uncaught) error here will trigger a
     # reboot to ensure the machine is always available
     try:
-        wait_for_commands(hmac_key, PORT, opener_pin)
+        wait_for_commands(hmac_key, hostname, PORT, opener_pin)
     except KeyboardInterrupt:
         raise
     except Exception as e:

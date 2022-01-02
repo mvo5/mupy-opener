@@ -15,6 +15,7 @@ default_cfg = {
 # XXX: json is a terrible way to do configs but it's part of the
 # reference lib
 
+
 def read_config():
     cfg = default_cfg.copy()
     try:

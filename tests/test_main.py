@@ -58,7 +58,8 @@ class TestMain(BaseTest):
         with socket.socket() as sss:
             connect_or_retry(sss, addr, 10)
             self.assertRegex(
-                tg_bot_send_q.get(), r'mupy-opener listening on port [0-9]+')
+                tg_bot_send_q.get(),
+                r'mupy-opener listening on opener port [0-9]+')
             ss = sss.makefile("rwb", 0)
             m1 = ss.readline()
             sjm = SignedJsonMessage.from_string(
@@ -74,7 +75,8 @@ class TestMain(BaseTest):
             sjm3 = SignedJsonMessage.from_string(
                 m2.decode("utf-8"), self.hmac_key, sjm.nonce)
             self.assertEqual(sjm3.payload, {"status": "ok"})
-            self.assertRegex(tg_bot_send_q.get(), r'door opened by .*')
+            self.assertRegex(
+                tg_bot_send_q.get(), r'door opened on opener by .*')
             # XXX: test that the socket gets closed
         for i in range(20):
             if os.path.exists("pin21.value"):
