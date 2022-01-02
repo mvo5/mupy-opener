@@ -1,5 +1,7 @@
 #!/bin/sh
 
+set -e
+
 # XXX: have setup.py instead?
 
 # XXX: replace ampy with micropython 1.16 new tool (mremote?)
