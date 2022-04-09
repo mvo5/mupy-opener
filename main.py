@@ -150,15 +150,14 @@ def main():
 
     try:
         with open("last-crash.log") as fp:
-            for log in fp.readlines():
-                tg_log(log)
+            log = fp.read()
+            tg_log(log)
     except OSError as e:
         if e.errno != 2:  # ENOENT
             tg_log("cannot open last-crash.log: {}".format(e))
 
     global last_crash_fp
-    # XXX: truncate after send via tg?
-    last_crash_fp = open("last-crash.log", "a")
+    last_crash_fp = open("last-crash.log", "w")
 
     # main execution loop - any (uncaught) error here will trigger a
     # reboot to ensure the machine is always available

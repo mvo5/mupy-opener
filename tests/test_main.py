@@ -5,7 +5,7 @@ import random
 import socket
 import time
 
-from unittest.mock import call, patch
+from unittest.mock import patch
 
 from tests.test_base import BaseTest
 
@@ -98,4 +98,4 @@ class TestMain(BaseTest):
         with open("last-crash.log", "w") as fp:
             fp.write("line1\nline2\n")
         main.main()
-        mock_tg_send.assert_has_calls([call("line1\n"), call("line2\n")])
+        mock_tg_send.assert_called_with("line1\nline2\n")
