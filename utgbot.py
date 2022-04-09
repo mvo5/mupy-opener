@@ -26,8 +26,10 @@ class TelegramBot:
             response = urequests.post(
                 self._url + "/sendMessage", json=data, headers=headers, timeout=TIMEOUT
             )
+            # response.text must be read before closing the socket
+            text = response.text
             response.close()
             if response.status_code != 200:
-                print("cannot send to tg:", response.status_code, response.text)
+                print("cannot send to tg:", response.status_code, text, response.reason)
                 return False
             return True
