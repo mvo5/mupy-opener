@@ -35,8 +35,14 @@ OPENER_WAIT = 1
 
 
 def tg_log(msg):
+    if not msg:
+        return
     print("tg_log: {}".format(msg))
-    telegram_bot.send(msg)
+    # XXX: retry?
+    try:
+        telegram_bot.send(msg)
+    except Exception as e:
+        print(e)
 
 
 def gen_nonce():
