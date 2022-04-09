@@ -16,4 +16,4 @@ class TestStatic(unittest.TestCase):
         )
 
     def test_black_clean(self):
-        subprocess.check_call(["black", "--check", self.prj_path])
+        subprocess.check_call(["black", "--check", "--exclude=lib", self.prj_path])
