@@ -54,13 +54,10 @@ class SignedJsonMessage:
     nonce and uses plain base64 (because micropython has no
     urlsafe_b64encode).
     """
+
     def __init__(self, key, nonce, digestmode=hashlib.sha512):
         # type: (bytes, str, Callable[..., Any]) -> None
-        self._header = {
-            "ver": "1",
-            "alg": "HS512",
-            "nonce": nonce,
-        }
+        self._header = {"ver": "1", "alg": "HS512", "nonce": nonce}
         self._payload = {}  # type: Dict[Any, Any]
         self._key = key
         self._digestmode = digestmode
@@ -78,10 +75,7 @@ class SignedJsonMessage:
 
     def __str__(self):
         # type: () -> str
-        hp = "%s.%s" % (
-            b64encode_json(self._header),
-            b64encode_json(self._payload),
-        )
+        hp = "%s.%s" % (b64encode_json(self._header), b64encode_json(self._payload))
         sig = hmac.HMAC(self._key, hp.encode("utf-8"), self._digestmode)
         return "%s.%s" % (hp, b64encode_to_str(sig.digest()))
 
@@ -94,7 +88,8 @@ class SignedJsonMessage:
             raise InvalidFormatError("invalid data format '%s'" % s)
         recv_sig = b64decode_from_str(encoded_signature)
         calculated_sig = hmac.HMAC(
-            key, encoded_header_payload.encode("utf-8"), digestmode).digest()
+            key, encoded_header_payload.encode("utf-8"), digestmode
+        ).digest()
         # XXX: micropython has no "compare_digest"
         if calculated_sig != recv_sig:
             raise InvalidSignatureError()
@@ -115,6 +110,5 @@ class SignedJsonMessage:
 if __name__ == "__main__":
     msg = SignedJsonMessage("key".encode("utf-8"), "nonce")
     print(msg)
-    sjm1 = SignedJsonMessage.from_string(
-        str(msg), "key".encode("utf-8"), "nonce")
+    sjm1 = SignedJsonMessage.from_string(str(msg), "key".encode("utf-8"), "nonce")
     print(sjm1)

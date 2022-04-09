@@ -1,7 +1,7 @@
 import sys
 import time
 
-is_micropython = (sys.implementation.name == "micropython")
+is_micropython = sys.implementation.name == "micropython"
 
 if not is_micropython:
     import binascii
@@ -95,16 +95,14 @@ def wait_for_commands(key, hostname, port, opener_pin):
         try:
             send_with_hmac(f, key, nonce, {"version": 1, "api": "opener"})
         except Exception as e:
-            tg_log(
-                "cannot send helo on {}: {} to {}".format(hostname, e, addr))
+            tg_log("cannot send helo on {}: {} to {}".format(hostname, e, addr))
             conn.close()
             continue
         # we expect a command next
         try:
             cmd = recv_with_hmac(f, key, nonce)
         except Exception as e:
-            tg_log(
-                "cannot recv cmd on {}: {} from {}".format(hostname, e, addr))
+            tg_log("cannot recv cmd on {}: {} from {}".format(hostname, e, addr))
             conn.close()
             continue
         # accept command
@@ -114,18 +112,15 @@ def wait_for_commands(key, hostname, port, opener_pin):
             try:
                 send_with_hmac(f, key, nonce, {"status": "ok"})
             except Exception as e:
-                tg_log("cannot send status on {}: {} to {}".format(
-                    hostname, e, addr))
+                tg_log("cannot send status on {}: {} to {}".format(hostname, e, addr))
                 conn.close()
                 continue
         else:
             err = '{"error": "unknown command {}"}\n'.format(cmd)
-            tg_log("unknown command on {} in {} from {}".format(
-                hostname, cmd, addr))
+            tg_log("unknown command on {} in {} from {}".format(hostname, cmd, addr))
             f.write(err.encode("ascii"))
         # log event
-        tg_log(
-            "door on {} opened by {} {}".format(hostname, device_info, addr))
+        tg_log("door on {} opened by {} {}".format(hostname, device_info, addr))
         # done
         conn.close()
 

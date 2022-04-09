@@ -1,4 +1,3 @@
-
 # mock some consts
 STA_IF = "STA_IF"
 

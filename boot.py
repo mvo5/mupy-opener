@@ -1,6 +1,6 @@
 import sys
 
-is_micropython = (sys.implementation.name == "micropython")
+is_micropython = sys.implementation.name == "micropython"
 
 if not is_micropython:
     import mock.machine as machine
@@ -33,8 +33,7 @@ def boot():
         return
     # connect wlan
     ip = connect_wlan(cfg["ssid"], cfg["key"], cfg["hostname"])
-    print("connected as {} ({}) to {}".format(
-        ip, cfg["hostname"], cfg["ssid"]))
+    print("connected as {} ({}) to {}".format(ip, cfg["hostname"], cfg["ssid"]))
 
 
 if __name__ == "__main__":

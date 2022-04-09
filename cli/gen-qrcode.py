@@ -12,10 +12,7 @@ if __name__ == "__main__":
     # read full config (including defaults)
     full_cfg = read_config()
     # only show the relevant subset for the app to scan
-    cfg = {
-        "hostname": full_cfg["hostname"],
-        "hmac-key": full_cfg["hmac-key"],
-    }
+    cfg = {"hostname": full_cfg["hostname"], "hmac-key": full_cfg["hmac-key"]}
     qr = qrcode.QRCode()
     qr.add_data(json.dumps(cfg))
     qr.make(fit=True)

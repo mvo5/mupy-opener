@@ -1,6 +1,6 @@
 import sys
 
-is_micropython = (sys.implementation.name == "micropython")
+is_micropython = sys.implementation.name == "micropython"
 
 import json
 

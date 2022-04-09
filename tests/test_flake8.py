@@ -6,5 +6,4 @@ import unittest
 class TestFlake8(unittest.TestCase):
     def test_flake8(self):
         p = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
-        subprocess.check_call(
-            ["flake8", "--ignore=E402", "--exclude=./lib", p])
+        subprocess.check_call(["flake8", "--ignore=E402", "--exclude=./lib", p])

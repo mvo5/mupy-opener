@@ -28,7 +28,6 @@ def connect_or_retry(ss, addr, n_tries=10):
 
 
 class TestMain(BaseTest):
-
     def setUp(self):
         super().setUp()
         # XXX: restore value
@@ -58,25 +57,22 @@ class TestMain(BaseTest):
         with socket.socket() as sss:
             connect_or_retry(sss, addr, 10)
             self.assertRegex(
-                tg_bot_send_q.get(),
-                r'mupy-opener listening on opener port [0-9]+')
+                tg_bot_send_q.get(), r"mupy-opener listening on opener port [0-9]+"
+            )
             ss = sss.makefile("rwb", 0)
             m1 = ss.readline()
-            sjm = SignedJsonMessage.from_string(
-                m1.decode("utf-8"), self.hmac_key)
-            self.assertEqual(
-                sjm.payload,
-                {"version": 1, "api": "opener"})
+            sjm = SignedJsonMessage.from_string(m1.decode("utf-8"), self.hmac_key)
+            self.assertEqual(sjm.payload, {"version": 1, "api": "opener"})
             sjm2 = SignedJsonMessage(self.hmac_key, sjm.nonce)
             sjm2.set_payload({"cmd": "open"})
             ss.write(str(sjm2).encode("utf-8") + b"\n")
             ss.flush()
             m2 = ss.readline()
             sjm3 = SignedJsonMessage.from_string(
-                m2.decode("utf-8"), self.hmac_key, sjm.nonce)
+                m2.decode("utf-8"), self.hmac_key, sjm.nonce
+            )
             self.assertEqual(sjm3.payload, {"status": "ok"})
-            self.assertRegex(
-                tg_bot_send_q.get(), r'door on opener opened by .*')
+            self.assertRegex(tg_bot_send_q.get(), r"door on opener opened by .*")
             # XXX: test that the socket gets closed
         for i in range(20):
             if os.path.exists("pin21.value"):

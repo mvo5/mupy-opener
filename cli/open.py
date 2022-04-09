@@ -2,10 +2,7 @@
 
 import socket
 
-from main import (
-    send_with_hmac,
-    recv_with_hmac,
-)
+from main import send_with_hmac, recv_with_hmac
 from config import read_config
 from sjm import SignedJsonMessage
 
@@ -23,8 +20,7 @@ def open():
     so = so.makefile("rwb", 0)
     m1 = so.readline()
     # print(m1)
-    sjm = SignedJsonMessage.from_string(
-        m1.decode("utf-8"), key, expected_nonce=None)
+    sjm = SignedJsonMessage.from_string(m1.decode("utf-8"), key, expected_nonce=None)
     if sjm.payload != {"api": "opener", "version": 1}:
         raise Exception("unexpected payload %s" % str(sjm))
     # send open command
