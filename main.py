@@ -38,11 +38,14 @@ def tg_log(msg):
     if not msg:
         return
     print("tg_log: {}".format(msg))
-    # XXX: retry?
-    try:
-        telegram_bot.send(msg)
-    except Exception as e:
-        print(e)
+    # retry sending up to 3 times
+    for i in range(3):
+        try:
+            if telegram_bot.send(msg):
+                break
+        except Exception as e:
+            time.sleep(1)
+            print(e)
 
 
 def gen_nonce():
