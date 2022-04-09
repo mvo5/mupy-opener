@@ -148,7 +148,16 @@ def main():
         print("hmac key {} should not be too short".format(hmac_key))
         return
 
+    try:
+        with open("last-crash.log") as fp:
+            for log in fp.readlines():
+                tg_log(log)
+    except OSError as e:
+        if e.errno != 2:  # ENOENT
+            tg_log("cannot open last-crash.log: {}".format(e))
+
     global last_crash_fp
+    # XXX: truncate after send via tg?
     last_crash_fp = open("last-crash.log", "a")
 
     # main execution loop - any (uncaught) error here will trigger a

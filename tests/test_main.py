@@ -5,7 +5,7 @@ import random
 import socket
 import time
 
-from unittest.mock import patch
+from unittest.mock import call, patch
 
 from tests.test_base import BaseTest
 
@@ -91,3 +91,11 @@ class TestMain(BaseTest):
         main.main()
         with open("last-crash.log") as fp:
             self.assertEqual(fp.read(), "fake exception\n")
+
+    @patch("main.tg_log")
+    @patch("main.wait_for_commands")
+    def test_main_sends_last_exceptions(self, mock_wait_for_cmds, mock_tg_send):
+        with open("last-crash.log", "w") as fp:
+            fp.write("line1\nline2\n")
+        main.main()
+        mock_tg_send.assert_has_calls([call("line1\n"), call("line2\n")])
