@@ -1,10 +1,9 @@
 #!/usr/bin/python3
 
 import binascii
-import hashlib
-import hmac
 import json
 
+from uhmac import HMAC_256
 
 try:
     from typing import Any, Callable, Dict
@@ -55,12 +54,11 @@ class SignedJsonMessage:
     urlsafe_b64encode).
     """
 
-    def __init__(self, key, nonce, digestmode=hashlib.sha512):
+    def __init__(self, key, nonce):
         # type: (bytes, str, Callable[..., Any]) -> None
-        self._header = {"ver": "1", "alg": "HS512", "nonce": nonce}
+        self._header = {"ver": "1", "alg": "HS256", "nonce": nonce}
         self._payload = {}  # type: Dict[Any, Any]
         self._key = key
-        self._digestmode = digestmode
 
     def set_payload(self, payload):
         self._payload = payload
@@ -76,20 +74,18 @@ class SignedJsonMessage:
     def __str__(self):
         # type: () -> str
         hp = "%s.%s" % (b64encode_json(self._header), b64encode_json(self._payload))
-        sig = hmac.HMAC(self._key, hp.encode("utf-8"), self._digestmode)
+        sig = HMAC_256(self._key, hp.encode("utf-8"))
         return "%s.%s" % (hp, b64encode_to_str(sig.digest()))
 
     @staticmethod
-    def from_string(s, key, expected_nonce=None, digestmode=hashlib.sha512):
+    def from_string(s, key, expected_nonce=None):
         # type: (str, bytes, str,  Callable[..., Any]) -> SignedJsonMessage
         try:
             encoded_header_payload, encoded_signature = s.rsplit(".", 1)
         except ValueError:
             raise InvalidFormatError("invalid data format '%s'" % s)
         recv_sig = b64decode_from_str(encoded_signature)
-        calculated_sig = hmac.HMAC(
-            key, encoded_header_payload.encode("utf-8"), digestmode
-        ).digest()
+        calculated_sig = HMAC_256(key, encoded_header_payload.encode("utf-8")).digest()
         # XXX: micropython has no "compare_digest"
         if calculated_sig != recv_sig:
             raise InvalidSignatureError()

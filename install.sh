@@ -23,17 +23,7 @@ fi
 # get hmac from external
 mkdir -p lib
 (cd lib ; 
-  wget -c https://raw.githubusercontent.com/micropython/micropython-lib/master/python-stdlib/hmac/hmac.py ; 
-  wget -c https://raw.githubusercontent.com/micropython/micropython-lib/master/python-stdlib/warnings/warnings.py ;
   wget -c -O mvourequests.py https://raw.githubusercontent.com/mvo5/micropython-lib/urequests-simple-timeout/python-ecosys/urequests/urequests.py;
-)
-mkdir -p lib/hashlib
-(cd lib/hashlib;
- wget -c https://raw.githubusercontent.com/micropython/micropython-lib/master/python-stdlib/hashlib/hashlib/__init__.py ;
-   wget -c https://raw.githubusercontent.com/micropython/micropython-lib/master/python-stdlib/hashlib/hashlib/_sha224.py ;
-   wget -c https://raw.githubusercontent.com/micropython/micropython-lib/master/python-stdlib/hashlib/hashlib/_sha256.py ;
-   wget -c https://raw.githubusercontent.com/micropython/micropython-lib/master/python-stdlib/hashlib/hashlib/_sha384.py ;
-   wget -c https://raw.githubusercontent.com/micropython/micropython-lib/master/python-stdlib/hashlib/hashlib/_sha512.py ;
 )
 
 # upload the file
