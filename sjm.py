@@ -107,8 +107,16 @@ class SignedJsonMessage:
         return sjm
 
 
-if __name__ == "__main__":
+def test():
+    import time
+
+    now = time.ticks_ms()
     msg = SignedJsonMessage("key".encode("utf-8"), "nonce")
     print(msg)
     sjm1 = SignedJsonMessage.from_string(str(msg), "key".encode("utf-8"), "nonce")
     print(sjm1)
+    print("total time: {}".format(time.ticks_ms() - now))
+
+
+if __name__ == "__main__":
+    test()
