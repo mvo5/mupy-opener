@@ -3,7 +3,7 @@
 import binascii
 import json
 
-from uhmac import HMAC_256
+from uhmac import HMAC
 
 try:
     from typing import Any, Callable, Dict
@@ -74,7 +74,7 @@ class SignedJsonMessage:
     def __str__(self):
         # type: () -> str
         hp = "%s.%s" % (b64encode_json(self._header), b64encode_json(self._payload))
-        sig = HMAC_256(self._key, hp.encode("utf-8"))
+        sig = HMAC(self._key, hp.encode("utf-8"), "sha256")
         return "%s.%s" % (hp, b64encode_to_str(sig.digest()))
 
     @staticmethod
@@ -85,7 +85,9 @@ class SignedJsonMessage:
         except ValueError:
             raise InvalidFormatError("invalid data format '%s'" % s)
         recv_sig = b64decode_from_str(encoded_signature)
-        calculated_sig = HMAC_256(key, encoded_header_payload.encode("utf-8")).digest()
+        calculated_sig = HMAC(
+            key, encoded_header_payload.encode("utf-8"), "sha256"
+        ).digest()
         # XXX: micropython has no "compare_digest"
         if calculated_sig != recv_sig:
             raise InvalidSignatureError()
@@ -106,12 +108,14 @@ class SignedJsonMessage:
 def test():
     import time
 
-    now = time.ticks_ms()
+    if hasattr(time, "tick_ms"):
+        now = time.ticks_ms()
     msg = SignedJsonMessage("key".encode("utf-8"), "nonce")
     print(msg)
     sjm1 = SignedJsonMessage.from_string(str(msg), "key".encode("utf-8"), "nonce")
     print(sjm1)
-    print("total time: {}".format(time.ticks_ms() - now))
+    if hasattr(time, "tick_ms"):
+        print("total time: {}".format(time.ticks_ms() - now))
 
 
 if __name__ == "__main__":
