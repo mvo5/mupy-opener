@@ -60,3 +60,40 @@ class TestHMAC(unittest.TestCase):
             "9b09ffa71b942fcb27635fbcd5b0e944bfdc63644f0713938a7f51535c3a35e2"
         )
         sha256test(key, data, expected_hmac)
+
+    def test_sha1(self):
+        def sha1test(key, data, expected_hmac):
+            hmac = uhmac.HMAC(key, data, "sha1")
+            self.assertEqual(hmac.hexdigest(), expected_hmac)
+
+        sha1test(b"\x0b" * 20, b"Hi There", "b617318655057264e28bc0b6fb378c8ef146be00")
+        sha1test(
+            b"Jefe",
+            b"what do ya want for nothing?",
+            "effcdf6ae5eb2fa2d27416d5f184df9c259a7c79",
+        )
+
+        sha1test(b"\xAA" * 20, b"\xDD" * 50, "125d7342b9ac11cd91a39af48aa17b4f63f175d3")
+        sha1test(
+            bytes(range(1, 26)),
+            b"\xCD" * 50,
+            "4c9007f4026250c6bc8414f9bf50c86c2d7235da",
+        )
+        sha1test(
+            b"\x0C" * 20,
+            b"Test With Truncation",
+            "4c1a03424b55e07fe7f27be1d58bb9324a9a5a04",
+        )
+        sha1test(
+            b"\xAA" * 80,
+            b"Test Using Larger Than Block-Size Key - Hash Key First",
+            "aa4ae5e15272d00e95705637ce8a3b55ed402112",
+        )
+        sha1test(
+            b"\xAA" * 80,
+            (
+                b"Test Using Larger Than Block-Size Key "
+                b"and Larger Than One Block-Size Data"
+            ),
+            "e8e99d0f45237d786d6bbaa7965c7808bbff1a91",
+        )
