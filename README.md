@@ -54,7 +54,7 @@ to open.
 
 To update, just run `install.sh` again - but one side effect of
 running the watchdog timer (see below) is that to reflash via
-`install.sh` one needs to interrupt the esp32 boot very early via
+`install.sh` one may need to interrupt the esp32 boot very early via
 e.g. `screen /dev/ttyUSB0 115200` and then `ctrl-c` in there to avoid
 the watchdog from getting triggered. After that the `install.sh` will
 work normally.
@@ -80,18 +80,18 @@ support this but a) YAGNI b) there is nothing secret currently in
 these messages.
 
 Each message contains a header with the sign algoirthm used (but only
-HMAC-sha512 is implemented right now), the version of the protocol
+HMAC-sha256 is implemented right now), the version of the protocol
 ("1" right now) and a "nonce". Then the json payload and finally the
 signature. All parts are base64 encoded and concatenated with "." as
 the separator.
 
 The protocol itself is stateful and line oriented. When a client
 connects the esp32 sends a "welcome" message that contains the version
-and the supported api. Only the "opener" API is supported today but it
-would be trivial to extend.  In the header it also contains the
+and the supported api. Only the "opener" API is supported today (but it
+would be trivial to extend).  In the header it also contains the
 randomly generated nonce that is valid *only* for this session. The
 client then validates the signature and uses the nonce for all
-subsequent calls. The clientmakes API calls as json and the server
+subsequent calls. The client makes API calls as json and the server
 replies with json message as needed.
 
 ## Testing
@@ -119,7 +119,7 @@ The code was written with the goal that it should never go into
 a state where the opener will stop responding. This means that
 any uncaught exceptions are logged in `last-crash.log` and then
 the machine is restarted. In additon a watchdog timer is setup
-and it will trigger a reboot after 20s hang.
+and it will trigger a reboot after 30s hang.
 
 
 ## Design considerations
