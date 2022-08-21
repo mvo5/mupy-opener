@@ -129,6 +129,8 @@ def wait_for_commands(key, hostname, port, opener_pin):
             err = '{"error": "unknown command {}"}\n'.format(cmd)
             tg_log("unknown command on {} in {} from {}".format(hostname, cmd, addr))
             f.write(err.encode("ascii"))
+            conn.close()
+            continue
         # log event
         tg_log("door on {} opened by {} {}".format(hostname, device_info, addr))
         # done
