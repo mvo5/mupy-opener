@@ -1,3 +1,4 @@
+import gc
 import sys
 import time
 
@@ -132,6 +133,8 @@ def wait_for_commands(key, hostname, port, opener_pin):
         tg_log("door on {} opened by {} {}".format(hostname, device_info, addr))
         # done
         conn.close()
+        # clean GC (robustness)
+        gc.collect()
 
 
 def main():
