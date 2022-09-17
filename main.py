@@ -46,7 +46,7 @@ def tg_log(msg):
                 break
         except Exception as e:
             time.sleep(1)
-            print(e)
+            print("cannot sent to tg, retrying: {}".format(e))
 
 
 def gen_nonce():
