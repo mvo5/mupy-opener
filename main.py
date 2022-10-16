@@ -124,6 +124,7 @@ def wait_for_commands(key, hostname, port, opener_pin):
         except Exception as e:
             tg_log("cannot send helo on {}: {} to {}".format(hostname, e, addr))
             f.close()
+            conn.close()
             continue
         # we expect a command next
         try:
@@ -131,6 +132,7 @@ def wait_for_commands(key, hostname, port, opener_pin):
         except Exception as e:
             tg_log("cannot recv cmd on {}: {} from {}".format(hostname, e, addr))
             f.close()
+            conn.close()
             continue
         # accept command
         if cmd.get("cmd") == "open":
@@ -141,15 +143,18 @@ def wait_for_commands(key, hostname, port, opener_pin):
             except Exception as e:
                 tg_log("cannot send status on {}: {} to {}".format(hostname, e, addr))
                 f.close()
+                conn.close()
                 continue
         else:
             err = '{"error": "unknown command {}"}\n'.format(cmd)
             tg_log("unknown command on {} in {} from {}".format(hostname, cmd, addr))
             f.write(err.encode("ascii"))
             f.close()
+            conn.close()
             continue
         # done
         f.close()
+        conn.close()
         # log event
         tg_log(
             "door on {} opened by {} {} (mem {})".format(
