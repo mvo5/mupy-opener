@@ -106,7 +106,7 @@ def wait_for_commands(key, hostname, port, opener_pin):
             conn, addr = s.accept()
         except OSError as e:
             # this will feed the watchgod every 5s
-            if e.errno == errno.TIMEDOUT:
+            if e.errno == errno.ETIMEDOUT:
                 continue
             raise
         # No tg_log() here to avoid delaying processing of the commands,
