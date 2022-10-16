@@ -6,6 +6,10 @@ def reset():
     pass
 
 
+def reset_cause():
+    return 0
+
+
 class Pin:
     IN = "in"
     OUT = "out"

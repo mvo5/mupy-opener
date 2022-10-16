@@ -57,8 +57,10 @@ class TestMain(BaseTest):
         with socket.socket() as sss:
             connect_or_retry(sss, addr, 10)
             self.assertRegex(
-                tg_bot_send_q.get(), r"mupy-opener listening on opener port [0-9]+"
+                tg_bot_send_q.get(),
+                r"upy-opener listening on opener port [0-9]+ \(reset cause: 0\)",
             )
+
             ss = sss.makefile("rwb", 0)
             m1 = ss.readline()
             sjm = SignedJsonMessage.from_string(m1.decode("utf-8"), self.hmac_key)

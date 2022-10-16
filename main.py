@@ -90,7 +90,11 @@ def wait_for_commands(key, hostname, port, opener_pin):
     s.settimeout(5.0)
     s.bind(addr)
     s.listen(1)
-    tg_log("mupy-opener listening on {} port {}".format(hostname, PORT))
+    tg_log(
+        "mupy-opener listening on {} port {} (reset cause: {})".format(
+            hostname, port, machine.reset_cause()
+        )
+    )
 
     # watchdog timeout for 30s
     wdt = machine.WDT(timeout=30000)
