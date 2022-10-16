@@ -93,7 +93,7 @@ def wait_for_commands(key, hostname, port, opener_pin):
     # socket wait will timeout every 5s
     s.settimeout(5.0)
     s.bind(addr)
-    s.listen(1)
+    s.listen(5)
     tg_log(
         "mupy-opener listening on {} port {} (reset cause: {})".format(
             hostname, port, machine.reset_cause()
