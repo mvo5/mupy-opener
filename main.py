@@ -8,11 +8,13 @@ if not is_micropython:
     import binascii
     import socket
     from mock import machine
+    import mock.esp as esp
     import mock.gc as gc
     import mock.uos as os
     import mock.usys as usys
 else:
     import binascii
+    import esp
     import gc
     import os
     import socket
@@ -168,6 +170,8 @@ def wait_for_commands(key, hostname, port, opener_pin):
 
 
 def main():
+    esp.osdebug(esp.LOG_WARN)
+
     cfg = read_config()
     # init bot
     telegram_bot_token = cfg.get("telegram-bot-token")
