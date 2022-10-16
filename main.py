@@ -88,6 +88,8 @@ def wait_for_commands(key, hostname, port, opener_pin):
     addr = socket.getaddrinfo("0.0.0.0", port)[0][-1]
     device_info = "unknown"
     s = socket.socket()
+    # ensure no TIME_WAIT issues after socket closing
+    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     # socket wait will timeout every 5s
     s.settimeout(5.0)
     s.bind(addr)
