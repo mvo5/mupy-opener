@@ -1,3 +1,4 @@
+import errno
 import gc
 import sys
 import time
@@ -89,7 +90,7 @@ def wait_for_commands(key, hostname, port, opener_pin):
     # socket wait will timeout every 5s
     s.settimeout(5.0)
     s.bind(addr)
-    s.listen(1)
+    s.listen()
     tg_log(
         "mupy-opener listening on {} port {} (reset cause: {})".format(
             hostname, port, machine.reset_cause()
@@ -102,9 +103,11 @@ def wait_for_commands(key, hostname, port, opener_pin):
         wdt.feed()
         try:
             conn, addr = s.accept()
-        except OSError:
+        except OSError as e:
             # this will feed the watchgod every 5s
-            continue
+            if e.errno == errno.TIMEDOUT:
+                continue
+            raise
         # No tg_log() here to avoid delaying processing of the commands,
         # also no _thread.start_new_thread() because that is too memory
         # hungry on the esp32
