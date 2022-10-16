@@ -1,5 +1,4 @@
 import errno
-import gc
 import sys
 import time
 
@@ -9,10 +8,12 @@ if not is_micropython:
     import binascii
     import socket
     from mock import machine
+    import mock.gc as gc
     import mock.uos as os
     import mock.usys as usys
 else:
     import binascii
+    import gc
     import os
     import socket
     import machine
@@ -122,14 +123,14 @@ def wait_for_commands(key, hostname, port, opener_pin):
             send_with_hmac(f, key, nonce, {"version": 1, "api": "opener"})
         except Exception as e:
             tg_log("cannot send helo on {}: {} to {}".format(hostname, e, addr))
-            conn.close()
+            f.close()
             continue
         # we expect a command next
         try:
             cmd = recv_with_hmac(f, key, nonce)
         except Exception as e:
             tg_log("cannot recv cmd on {}: {} from {}".format(hostname, e, addr))
-            conn.close()
+            f.close()
             continue
         # accept command
         if cmd.get("cmd") == "open":
@@ -139,18 +140,22 @@ def wait_for_commands(key, hostname, port, opener_pin):
                 send_with_hmac(f, key, nonce, {"status": "ok"})
             except Exception as e:
                 tg_log("cannot send status on {}: {} to {}".format(hostname, e, addr))
-                conn.close()
+                f.close()
                 continue
         else:
             err = '{"error": "unknown command {}"}\n'.format(cmd)
             tg_log("unknown command on {} in {} from {}".format(hostname, cmd, addr))
             f.write(err.encode("ascii"))
-            conn.close()
+            f.close()
             continue
-        # log event
-        tg_log("door on {} opened by {} {}".format(hostname, device_info, addr))
         # done
-        conn.close()
+        f.close()
+        # log event
+        tg_log(
+            "door on {} opened by {} {} (mem {})".format(
+                hostname, device_info, addr, gc.mem_free()
+            )
+        )
         # clean GC (robustness)
         gc.collect()
 
