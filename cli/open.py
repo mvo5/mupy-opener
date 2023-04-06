@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 import socket
+import sys
 
 from main import send_with_hmac, recv_with_hmac
 from config import read_config
@@ -11,7 +12,10 @@ PORT = 8877
 
 
 def open():
-    cfg = read_config()
+    if len(sys.argv) > 1:
+        cfg = read_config(sys.argv[1])
+    else:
+        cfg = read_config()
     key = cfg["hmac-key"].encode("ascii")
     hostname = cfg["hostname"]
 
@@ -21,8 +25,8 @@ def open():
     m1 = so.readline()
     # print(m1)
     sjm = SignedJsonMessage.from_string(m1.decode("utf-8"), key, expected_nonce=None)
-    if sjm.payload != {"api": "opener", "version": 1}:
-        raise Exception("unexpected payload %s" % str(sjm))
+    if sjm.payload != {"api": "opener", "version": "1"}:
+        raise Exception("unexpected payload %s" % str(sjm.payload))
     # send open command
     device_info = socket.gethostname()
     cmd_json = {"cmd": "open", "device-info": device_info}

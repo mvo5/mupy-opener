@@ -16,10 +16,10 @@ default_cfg = {
 # reference lib
 
 
-def read_config():
+def read_config(path="config.json"):
     cfg = default_cfg.copy()
     try:
-        with open("config.json") as f:
+        with open(path) as f:
             # merge with default config
             cfg.update(json.load(f))
     except Exception as e:
