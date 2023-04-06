@@ -21,9 +21,8 @@ else:
 
 
 from config import read_config
-from sjm import SignedJsonMessage
 from utgbot import TelegramBot
-
+from netutil import send_with_hmac, recv_with_hmac
 
 # available if defined in the config
 telegram_bot = TelegramBot()
@@ -60,27 +59,6 @@ def toogle_pin(pin):
     pin.value(1)
     time.sleep(OPENER_WAIT)
     pin.value(0)
-
-
-def send_with_hmac(so, key, nonce, msg):
-    sjm = SignedJsonMessage(key, nonce)
-    sjm.set_payload(msg)
-    so.write(str(sjm).encode("utf-8") + b"\n")
-
-
-def readline_until_non_empty(so):
-    while True:
-        msg = so.readline()
-        if msg:
-            return msg
-
-
-def recv_with_hmac(so, key, nonce):
-    # sometimes we get an empty readline message here, discard that and
-    # read until there is actual data
-    msg = readline_until_non_empty(so)
-    sjm = SignedJsonMessage.from_string(msg.decode("utf-8"), key, nonce)
-    return sjm.payload
 
 
 def wait_for_commands(key, hostname, port, opener_pin):

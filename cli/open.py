@@ -3,7 +3,7 @@
 import socket
 import sys
 
-from main import send_with_hmac, recv_with_hmac
+from netutil import send_with_hmac, recv_with_hmac
 from config import read_config
 from sjm import SignedJsonMessage
 
