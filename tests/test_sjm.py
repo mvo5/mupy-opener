@@ -24,6 +24,26 @@ class TestSignedJsonMessage(unittest.TestCase):
         self.assertEqual(self.sjmsg._payload, sjmsg2._payload)
         self.assertEqual(str(self.sjmsg), str(sjmsg2))
 
+    def test_sjm_from_string2(self):
+        msg = sjm.SignedJsonMessage.from_string(
+            "eyJhbGciOiJIUzI1NiIsIm5vbmNlIjoibm9uY2UiLCJ2ZXIiOiIxIn0="
+            ".eyJmb28iOiJiYXIifQ==.5sO1KIJIGn/ZAAwvWui9/gIHrfntLYFVnz"
+            "57aMBOCCY=",
+            b"key",
+            "nonce",
+        )
+        print(msg)
+
+    def test_create_sjm(self):
+        msg = sjm.SignedJsonMessage(b"key", "nonce")
+        msg.set_payload({"foo": "bar"})
+        self.assertEqual(
+            str(msg),
+            "eyJ2ZXIiOiAiMSIsICJhbGciOiAiSFMyNTYiLCAibm9uY2UiOiAi"
+            "bm9uY2UifQ==.eyJmb28iOiAiYmFyIn0=.7WdCzTIR0FP9ssODM8"
+            "xxRiwW3BkTvTw0SiIlTW/oUdk=",
+        )
+
     def test_sjm_from_string_wrong_format_empty(self):
         with self.assertRaises(sjm.InvalidFormatError):
             sjm.SignedJsonMessage.from_string("", b"other-key", self.nonce)
