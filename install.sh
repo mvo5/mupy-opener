@@ -20,7 +20,6 @@ if ! test -w "$AMPY_PORT"; then
 fi
 
 # XXX: terrible, use micropython pip instead
-# get hmac from external
 mkdir -p lib
 (cd lib ; 
   wget -c -O mvourequests.py https://raw.githubusercontent.com/mvo5/micropython-lib/urequests-simple-timeout/python-ecosys/urequests/urequests.py;
@@ -30,6 +29,14 @@ mkdir -p lib
 for f in *.py lib/ config.json; do
     ampy put $f
 done
+
+# support for an alternative main.py
+if [ -n "$1" ]; then
+    TMPDIR=$(mktemp -d)
+    cp -a "$1" "$TMPDIR/main.py"
+    ampy put  "$TMPDIR/main.py"
+    rm -rf "$TMPDIR"
+fi
 
 echo "files uploaded, new dir content:"
 ampy ls
