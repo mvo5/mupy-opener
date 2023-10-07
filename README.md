@@ -10,7 +10,7 @@ set a pin to "high" for 1 sec to close a relay that will open a garage
 door.
 
 There is a CLI python program to trigger the opening and a matching
-android app as well.
+android app as well (http://github.com/mvo5/flutter-opener).
 
 ## Install
 
